@@ -118,6 +118,30 @@ struct rkisp1_isr_data {
 	u32 line_mask;
 };
 
+static int rkisp1_buf_3dnr_create(struct rkisp1_params *params)
+{
+	u32 size = 4 * ALIGN(RKISP1_ISP_MAX_WIDTH * RKISP1_ISP_MAX_HEIGHT, 16);
+
+	/* The driver never accesses vaddr. Thus, no mapping is required. */
+	params->buf_3dnr.vaddr = dma_alloc_attrs(params->rkisp1->dev, size,
+						  &params->buf_3dnr.dma_addr,
+						  GFP_KERNEL,
+						  DMA_ATTR_NO_KERNEL_MAPPING);
+	if (!params->buf_3dnr.vaddr)
+		return -ENOMEM;
+
+	params->buf_3dnr.size = size;
+
+	return 0;
+}
+
+static void rkisp1_buf_3dnr_destroy(struct rkisp1_params *params)
+{
+	dma_free_attrs(params->rkisp1->dev, params->buf_3dnr.size,
+		       params->buf_3dnr.vaddr, params->buf_3dnr.dma_addr,
+		       DMA_ATTR_NO_KERNEL_MAPPING);
+}
+
 /* ----------------------------------------------------------------------------
  * Sensor DT bindings
  */
@@ -553,6 +577,15 @@ static const struct rkisp1_info imx8mp_isp_info = {
 		  | RKISP1_FEATURE_DMA_34BIT,
 };
 
+static const struct rkisp1_info rk3568_isp_info = {
+	.clks = rk3399_isp_clks,
+	.clk_size = ARRAY_SIZE(rk3399_isp_clks),
+	.isrs = px30_isp_isrs,
+	.isr_size = ARRAY_SIZE(px30_isp_isrs),
+	.isp_ver = RKISP1_V21,
+	.features = RKISP1_FEATURE_MIPI_CSI2,
+};
+
 static const struct of_device_id rkisp1_of_match[] = {
 	{
 		.compatible = "rockchip,px30-cif-isp",
@@ -565,6 +598,10 @@ static const struct of_device_id rkisp1_of_match[] = {
 	{
 		.compatible = "fsl,imx8mp-isp",
 		.data = &imx8mp_isp_info,
+	},
+	{
+		.compatible = "rockchip,rk3568-isp",
+		.data = &rk3568_isp_info,
 	},
 	{},
 };
@@ -603,6 +640,10 @@ static int rkisp1_probe(struct platform_device *pdev)
 	rkisp1->base_addr = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(rkisp1->base_addr))
 		return PTR_ERR(rkisp1->base_addr);
+
+	rkisp1->base2_addr = devm_platform_ioremap_resource(pdev, 1);
+	if (IS_ERR(rkisp1->base2_addr))
+		return PTR_ERR(rkisp1->base2_addr);
 
 	for (unsigned int il = 0; il < ARRAY_SIZE(rkisp1->irqs); ++il)
 		rkisp1->irqs[il] = -1;
@@ -696,6 +737,14 @@ static int rkisp1_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_unreg_entities;
 
+	/*
+	 * Allocate a memory block for the 3D bayer noise reduction as early as
+	 * possible to be safe to get a contiguous block.
+	 */
+	ret = rkisp1_buf_3dnr_create(&rkisp1->params);
+	if (ret)
+		dev_warn(dev, "Failed to allocate buf_3dnr: %d\n", ret);
+
 	rkisp1_debug_init(rkisp1);
 
 	return 0;
@@ -730,6 +779,7 @@ static void rkisp1_remove(struct platform_device *pdev)
 
 	media_device_unregister(&rkisp1->media_dev);
 	v4l2_device_unregister(&rkisp1->v4l2_dev);
+	rkisp1_buf_3dnr_destroy(&rkisp1->params);
 
 	media_device_cleanup(&rkisp1->media_dev);
 

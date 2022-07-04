@@ -45,20 +45,46 @@
 #define RKISP1_CIF_ISP_MODULE_DPF		(1U << 16)
 /* Denoise Pre-Filter Strength */
 #define RKISP1_CIF_ISP_MODULE_DPF_STRENGTH	(1U << 17)
+/* Big Histogram statistics configuration */
+#define RKISP1_CIF_ISP_MODULE_HST1		(1U << 18)
+#define RKISP1_CIF_ISP_MODULE_HST2		(1U << 19)
+#define RKISP1_CIF_ISP_MODULE_HST3		(1U << 20)
+/* Green Imbalance Correction */
+#define RKISP1_CIF_ISP_MODULE_GIC		(1U << 21)
+/* Noise reduction and sharpening */
+#define RKISP1_CIF_ISP_MODULE_BAYNR		(1U << 22)
+#define RKISP1_CIF_ISP_MODULE_BAY3D		(1U << 23)
+#define RKISP1_CIF_ISP_MODULE_YNR		(1U << 24)
+#define RKISP1_CIF_ISP_MODULE_CNR		(1U << 25)
+#define RKISP1_CIF_ISP_MODULE_SHARP		(1U << 26)
+#define RKISP1_CIF_ISP_MODULE_DRC		(1U << 27)
 
 #define RKISP1_CIF_ISP_CTK_COEFF_MAX            0x100
 #define RKISP1_CIF_ISP_CTK_OFFSET_MAX           0x800
 
 #define RKISP1_CIF_ISP_AE_MEAN_MAX_V10		25
 #define RKISP1_CIF_ISP_AE_MEAN_MAX_V12		81
+#define RKISP1_CIF_ISP_AE_MEAN_MAX_V21		25
 #define RKISP1_CIF_ISP_AE_MEAN_MAX		RKISP1_CIF_ISP_AE_MEAN_MAX_V12
 
 #define RKISP1_CIF_ISP_HIST_BIN_N_MAX_V10	16
 #define RKISP1_CIF_ISP_HIST_BIN_N_MAX_V12	32
-#define RKISP1_CIF_ISP_HIST_BIN_N_MAX		RKISP1_CIF_ISP_HIST_BIN_N_MAX_V12
+#define RKISP1_CIF_ISP_HIST_BIN_N_MAX_V21	256
+#define RKISP1_CIF_ISP_HIST_BIN_N_MAX		RKISP1_CIF_ISP_HIST_BIN_N_MAX_V21
 
-#define RKISP1_CIF_ISP_AFM_MAX_WINDOWS          3
+#define RKISP1_CIF_ISP_AFM_MAX_WINDOWS_V10	3
+#define RKISP1_CIF_ISP_AFM_MAX_WINDOWS_V12	3
+#define RKISP1_CIF_ISP_AFM_MAX_WINDOWS_V21	2
+#define RKISP1_CIF_ISP_AFM_MAX_WINDOWS          RKISP1_CIF_ISP_AFM_MAX_WINDOWS_V12
+
 #define RKISP1_CIF_ISP_DEGAMMA_CURVE_SIZE       17
+
+#define RKISP1_CIF_ISP_DRC_Y_NUM		17
+#define RKISP1_CIF_ISP_YNR_XY_NUM		17
+#define RKISP1_CIF_ISP_BAYNR_XY_NUM		16
+#define RKISP1_CIF_ISP_BAY3D_XY_NUM		16
+#define RKISP1_CIF_ISP_SHARP_X_NUM		7
+#define RKISP1_CIF_ISP_SHARP_Y_NUM		8
 
 #define RKISP1_CIF_ISP_BDM_MAX_TH               0xff
 
@@ -94,7 +120,8 @@
 /* Maximum number of color samples supported */
 #define RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES_V10   17
 #define RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES_V12   34
-#define RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES       RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES_V12
+#define RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES_V21   45
+#define RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES       RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES_V21
 
 /*
  * Lens shade correction
@@ -112,6 +139,7 @@
  */
 #define RKISP1_CIF_ISP_HISTOGRAM_WEIGHT_GRIDS_SIZE_V10 25
 #define RKISP1_CIF_ISP_HISTOGRAM_WEIGHT_GRIDS_SIZE_V12 81
+#define RKISP1_CIF_ISP_HISTOGRAM_WEIGHT_GRIDS_SIZE_V21 25
 #define RKISP1_CIF_ISP_HISTOGRAM_WEIGHT_GRIDS_SIZE     RKISP1_CIF_ISP_HISTOGRAM_WEIGHT_GRIDS_SIZE_V12
 
 /*
@@ -171,6 +199,9 @@
 #define RKISP1_CIF_ISP_STAT_AUTOEXP       (1U << 1)
 #define RKISP1_CIF_ISP_STAT_AFM           (1U << 2)
 #define RKISP1_CIF_ISP_STAT_HIST          (1U << 3)
+#define RKISP1_CIF_ISP_STAT_HIST1         (1U << 4)
+#define RKISP1_CIF_ISP_STAT_HIST2         (1U << 5)
+#define RKISP1_CIF_ISP_STAT_HIST3         (1U << 6)
 
 /**
  * enum rkisp1_cif_isp_version - ISP variants
@@ -183,6 +214,7 @@
  *	histogram as v12.
  * @RKISP1_V_IMX8MP: Used in at least i.MX8MP. Same number of entries in grids
  *	and histogram as v10.
+ * @RKISP1_V21: used at least in RK3566 and RK3568.
  */
 enum rkisp1_cif_isp_version {
 	RKISP1_V10 = 10,
@@ -190,6 +222,7 @@ enum rkisp1_cif_isp_version {
 	RKISP1_V12,
 	RKISP1_V13,
 	RKISP1_V_IMX8MP,
+	RKISP1_V21 = 21,
 };
 
 enum rkisp1_cif_isp_histogram_mode {
@@ -216,6 +249,7 @@ enum rkisp1_cif_isp_flt_mode {
  * enum rkisp1_cif_isp_exp_ctrl_autostop - stop modes
  * @RKISP1_CIF_ISP_EXP_CTRL_AUTOSTOP_0: continuous measurement
  * @RKISP1_CIF_ISP_EXP_CTRL_AUTOSTOP_1: stop measuring after a complete frame
+ * TODO: RKISP1_V21 does not support autostop?!
  */
 enum rkisp1_cif_isp_exp_ctrl_autostop {
 	RKISP1_CIF_ISP_EXP_CTRL_AUTOSTOP_0 = 0,
@@ -598,6 +632,142 @@ struct rkisp1_cif_isp_goc_config {
 	__u16 gamma_y[RKISP1_CIF_ISP_GAMMA_OUT_MAX_SAMPLES];
 };
 
+struct isp21_baynr_config {
+	__u8 sw_baynr_gauss_en;
+	__u8 sw_baynr_log_bypass;
+	__u16 sw_baynr_dgain1;
+	__u16 sw_baynr_dgain0;
+	__u16 sw_baynr_dgain2;
+	__u16 sw_baynr_pix_diff;
+	__u16 sw_baynr_diff_thld;
+	__u16 sw_baynr_softthld;
+	__u16 sw_bltflt_streng;
+	__u16 sw_baynr_reg_w1;
+	__u16 sw_sigma_x[RKISP1_CIF_ISP_BAYNR_XY_NUM];
+	__u16 sw_sigma_y[RKISP1_CIF_ISP_BAYNR_XY_NUM];
+	__u16 weit_d2;
+	__u16 weit_d1;
+	__u16 weit_d0;
+};
+
+struct isp21_bay3d_config {
+	__u8 sw_bay3d_exp_sel;
+	__u8 sw_bay3d_bypass_en;
+	__u8 sw_bay3d_pk_en;
+	__u16 sw_bay3d_softwgt;
+	__u16 sw_bay3d_sigratio;
+	__u32 sw_bay3d_glbpk2;
+	__u16 sw_bay3d_exp_str;
+	__u16 sw_bay3d_str;
+	__u16 sw_bay3d_wgtlmt_h;
+	__u16 sw_bay3d_wgtlmt_l;
+	__u16 sw_bay3d_sig_x[RKISP1_CIF_ISP_BAY3D_XY_NUM];
+	__u16 sw_bay3d_sig_y[RKISP1_CIF_ISP_BAY3D_XY_NUM];
+};
+
+struct isp21_ynr_config {
+	__u8 sw_ynr_thumb_mix_cur_en;
+	__u8 sw_ynr_global_gain_alpha;
+	__u8 sw_ynr_global_gain;
+	__u8 sw_ynr_flt1x1_bypass_sel;
+	__u8 sw_ynr_sft5x5_bypass;
+	__u8 sw_ynr_flt1x1_bypass;
+	__u8 sw_ynr_lgft3x3_bypass;
+	__u8 sw_ynr_lbft5x5_bypass;
+	__u8 sw_ynr_bft3x3_bypass;
+
+	__u16 sw_ynr_rnr_max_r;
+
+	__u16 sw_ynr_low_bf_inv1;
+	__u16 sw_ynr_low_bf_inv0;
+
+	__u16 sw_ynr_low_peak_supress;
+	__u16 sw_ynr_low_thred_adj;
+
+	__u16 sw_ynr_low_dist_adj;
+	__u16 sw_ynr_low_edge_adj_thresh;
+
+	__u16 sw_ynr_low_bi_weight;
+	__u16 sw_ynr_low_weight;
+	__u16 sw_ynr_low_center_weight;
+	__u16 sw_ynr_hi_min_adj;
+	__u16 sw_ynr_high_thred_adj;
+	__u8 sw_ynr_high_retain_weight;
+	__u8 sw_ynr_hi_edge_thed;
+	__u8 sw_ynr_base_filter_weight2;
+	__u8 sw_ynr_base_filter_weight1;
+	__u8 sw_ynr_base_filter_weight0;
+	__u16 sw_ynr_low_gauss1_coeff2;
+	__u16 sw_ynr_low_gauss1_coeff1;
+	__u16 sw_ynr_low_gauss1_coeff0;
+	__u16 sw_ynr_low_gauss2_coeff2;
+	__u16 sw_ynr_low_gauss2_coeff1;
+	__u16 sw_ynr_low_gauss2_coeff0;
+	__u8 sw_ynr_direction_weight3;
+	__u8 sw_ynr_direction_weight2;
+	__u8 sw_ynr_direction_weight1;
+	__u8 sw_ynr_direction_weight0;
+	__u8 sw_ynr_direction_weight7;
+	__u8 sw_ynr_direction_weight6;
+	__u8 sw_ynr_direction_weight5;
+	__u8 sw_ynr_direction_weight4;
+	__u16 sw_ynr_luma_points_x[RKISP1_CIF_ISP_YNR_XY_NUM];
+	__u16 sw_ynr_lsgm_y[RKISP1_CIF_ISP_YNR_XY_NUM];
+	__u16 sw_ynr_hsgm_y[RKISP1_CIF_ISP_YNR_XY_NUM];
+	__u8 sw_ynr_rnr_strength3[RKISP1_CIF_ISP_YNR_XY_NUM];
+};
+
+struct isp21_cnr_config {
+	__u8 sw_cnr_thumb_mix_cur_en;
+	__u8 sw_cnr_lq_bila_bypass;
+	__u8 sw_cnr_hq_bila_bypass;
+	__u8 sw_cnr_exgain_bypass;
+	__u8 sw_cnr_exgain_mux;
+	__u8 sw_cnr_gain_iso;
+	__u8 sw_cnr_gain_offset;
+	__u8 sw_cnr_gain_1sigma;
+	__u8 sw_cnr_gain_uvgain1;
+	__u8 sw_cnr_gain_uvgain0;
+	__u8 sw_cnr_lmed3_alpha;
+	__u8 sw_cnr_lbf5_gain_y;
+	__u8 sw_cnr_lbf5_gain_c;
+	__u8 sw_cnr_lbf5_weit_d3;
+	__u8 sw_cnr_lbf5_weit_d2;
+	__u8 sw_cnr_lbf5_weit_d1;
+	__u8 sw_cnr_lbf5_weit_d0;
+	__u8 sw_cnr_lbf5_weit_d4;
+	__u8 sw_cnr_hmed3_alpha;
+	__u16 sw_cnr_hbf5_weit_src;
+	__u16 sw_cnr_hbf5_min_wgt;
+	__u16 sw_cnr_hbf5_sigma;
+	__u16 sw_cnr_lbf5_weit_src;
+	__u16 sw_cnr_lbf3_sigma;
+};
+
+struct isp21_sharp_config {
+	__u8 sw_sharp_bypass;
+	__u8 sw_sharp_sharp_ratio;
+	__u8 sw_sharp_bf_ratio;
+	__u8 sw_sharp_gaus_ratio;
+	__u8 sw_sharp_pbf_ratio;
+	__u8 sw_sharp_luma_dx[RKISP1_CIF_ISP_SHARP_X_NUM];
+	__u16 sw_sharp_pbf_sigma_inv[RKISP1_CIF_ISP_SHARP_Y_NUM];
+	__u16 sw_sharp_bf_sigma_inv[RKISP1_CIF_ISP_SHARP_Y_NUM];
+	__u8 sw_sharp_bf_sigma_shift;
+	__u8 sw_sharp_pbf_sigma_shift;
+	__u16 sw_sharp_ehf_th[RKISP1_CIF_ISP_SHARP_Y_NUM];
+	__u16 sw_sharp_clip_hf[RKISP1_CIF_ISP_SHARP_Y_NUM];
+	__u8 sw_sharp_pbf_coef_2;
+	__u8 sw_sharp_pbf_coef_1;
+	__u8 sw_sharp_pbf_coef_0;
+	__u8 sw_sharp_bf_coef_2;
+	__u8 sw_sharp_bf_coef_1;
+	__u8 sw_sharp_bf_coef_0;
+	__u8 sw_sharp_gaus_coef_2;
+	__u8 sw_sharp_gaus_coef_1;
+	__u8 sw_sharp_gaus_coef_0;
+};
+
 /**
  * struct rkisp1_cif_isp_hst_config - Configuration for Histogram statistics
  *
@@ -815,6 +985,11 @@ struct rkisp1_cif_isp_isp_other_cfg {
 	struct rkisp1_cif_isp_dpf_strength_config dpf_strength_config;
 	struct rkisp1_cif_isp_cproc_config cproc_config;
 	struct rkisp1_cif_isp_ie_config ie_config;
+	struct isp21_ynr_config ynr_config;
+	struct isp21_cnr_config cnr_config;
+	struct isp21_sharp_config sharp_config;
+	struct isp21_baynr_config baynr_config;
+	struct isp21_bay3d_config bay3d_config;
 };
 
 /**
@@ -822,12 +997,18 @@ struct rkisp1_cif_isp_isp_other_cfg {
  *
  * @awb_meas_config: auto white balance config
  * @hst_config: histogram config
+ * @hst1_config: first histogram big config
+ * @hst2_config: second histogram big config
+ * @hst3_config: third histogram big config
  * @aec_config: auto exposure config
  * @afc_config: auto focus config
  */
 struct rkisp1_cif_isp_isp_meas_cfg {
 	struct rkisp1_cif_isp_awb_meas_config awb_meas_config;
 	struct rkisp1_cif_isp_hst_config hst_config;
+	struct rkisp1_cif_isp_hst_config hst1_config;
+	struct rkisp1_cif_isp_hst_config hst2_config;
+	struct rkisp1_cif_isp_hst_config hst3_config;
 	struct rkisp1_cif_isp_aec_config aec_config;
 	struct rkisp1_cif_isp_afc_config afc_config;
 };
@@ -910,7 +1091,10 @@ struct rkisp1_cif_isp_bls_meas_val {
  * RKISP1_CIF_ISP_AE_MEAN_MAX_V12 entries. RKISP1_CIF_ISP_AE_MEAN_MAX is equal
  * to the maximum of the two.
  *
- * Image is divided into 5x5 blocks on V10 and 9x9 blocks on V12.
+ * Version V21 has RKISP1_CIF_ISP_AE_MEAN_MAX_V21 entries.
+ * RKISP1_CIF_ISP_AE_MEAN_MAX is equal to the maximum of them.
+ *
+ * Image is divided into 5x5 blocks on V10 and V21, and 9x9 blocks on V12.
  */
 struct rkisp1_cif_isp_ae_stat {
 	__u8 exp_mean[RKISP1_CIF_ISP_AE_MEAN_MAX];
@@ -943,6 +1127,7 @@ struct rkisp1_cif_isp_af_stat {
 /**
  * struct rkisp1_cif_isp_hist_stat - statistics histogram data
  *
+ * @mode: histogram mode (from enum rkisp1_cif_isp_histogram_mode)
  * @hist_bins: measured bin counters. Each bin is a 20 bits unsigned fixed point
  *	       type. Bits 0-4 are the fractional part and bits 5-19 are the
  *	       integer part.
@@ -965,6 +1150,7 @@ struct rkisp1_cif_isp_af_stat {
  * equal to the maximum of the two.
  */
 struct rkisp1_cif_isp_hist_stat {
+	__u32 mode;
 	__u32 hist_bins[RKISP1_CIF_ISP_HIST_BIN_N_MAX];
 };
 
@@ -975,12 +1161,18 @@ struct rkisp1_cif_isp_hist_stat {
  * @ae: statistics data for auto exposure
  * @af: statistics data for auto focus
  * @hist: statistics histogram data
+ * @hist1: statistics histogram big 1 data
+ * @hist2: statistics histogram big 2 data
+ * @hist3: statistics histogram big 3 data
  */
 struct rkisp1_cif_isp_stat {
 	struct rkisp1_cif_isp_awb_stat awb;
 	struct rkisp1_cif_isp_ae_stat ae;
 	struct rkisp1_cif_isp_af_stat af;
 	struct rkisp1_cif_isp_hist_stat hist;
+	struct rkisp1_cif_isp_hist_stat hist1;
+	struct rkisp1_cif_isp_hist_stat hist2;
+	struct rkisp1_cif_isp_hist_stat hist3;
 };
 
 /**

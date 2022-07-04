@@ -26,6 +26,9 @@
 struct dentry;
 struct regmap;
 
+#define printhist if (0) printk
+//#define printhist printk
+
 /*
  * flags on the 'direction' field in struct rkisp1_mbus_info' that indicate
  * on which pad the media bus format is supported
@@ -61,6 +64,17 @@ struct regmap;
 						 RKISP1_CIF_ISP_AFM_FIN |	\
 						 RKISP1_CIF_ISP_EXP_END |	\
 						 RKISP1_CIF_ISP_HIST_MEASURE_RDY)
+
+#define RKISP1_STATS3A_MEAS_MASK_V21		\
+	(RKISP1_CIF_ISP_RAWAE_CH0_DONE_V21 |	\
+	 RKISP1_CIF_ISP_RAWHIST_CH0_DONE_V21 |	\
+	 RKISP1_CIF_ISP_RAWHIST_CH1_DONE_V21 |	\
+	 RKISP1_CIF_ISP_RAWHIST_CH2_DONE_V21 |	\
+	 RKISP1_CIF_ISP_RAWHIST_CH3_DONE_V21 |	\
+	 RKISP1_CIF_ISP_RAWAF_DONE_V21)
+
+#define RKMMU_OFFSET				0x1a00
+#define	BASE2_OFFSET				0x1b00
 
 /* IRQ lines */
 enum rkisp1_irq_line {
@@ -318,7 +332,17 @@ struct rkisp1_stats_ops {
 			     struct rkisp1_stat_buffer *pbuf);
 	void (*get_aec_meas)(struct rkisp1_stats *stats,
 			     struct rkisp1_stat_buffer *pbuf);
+	void (*get_afc_meas)(struct rkisp1_stats *stats,
+			     struct rkisp1_stat_buffer *pbuf);
 	void (*get_hst_meas)(struct rkisp1_stats *stats,
+			     struct rkisp1_stat_buffer *pbuf);
+	void (*get_hst1_meas)(struct rkisp1_stats *stats,
+			     struct rkisp1_stat_buffer *pbuf);
+	void (*get_hst2_meas)(struct rkisp1_stats *stats,
+			     struct rkisp1_stat_buffer *pbuf);
+	void (*get_hst3_meas)(struct rkisp1_stats *stats,
+			     struct rkisp1_stat_buffer *pbuf);
+	void (*get_bls_meas)(struct rkisp1_stats *stats,
 			     struct rkisp1_stat_buffer *pbuf);
 };
 
@@ -358,10 +382,40 @@ struct rkisp1_params_ops {
 			   const struct rkisp1_cif_isp_aec_config *arg);
 	void (*hst_config)(struct rkisp1_params *params,
 			   const struct rkisp1_cif_isp_hst_config *arg);
+	void (*hst1_config)(struct rkisp1_params *params,
+			   const struct rkisp1_cif_isp_hst_config *arg);
+	void (*hst2_config)(struct rkisp1_params *params,
+			   const struct rkisp1_cif_isp_hst_config *arg);
+	void (*hst3_config)(struct rkisp1_params *params,
+			   const struct rkisp1_cif_isp_hst_config *arg);
 	void (*hst_enable)(struct rkisp1_params *params,
+			   const struct rkisp1_cif_isp_hst_config *arg, bool en);
+	void (*hst1_enable)(struct rkisp1_params *params,
+			   const struct rkisp1_cif_isp_hst_config *arg, bool en);
+	void (*hst2_enable)(struct rkisp1_params *params,
+			   const struct rkisp1_cif_isp_hst_config *arg, bool en);
+	void (*hst3_enable)(struct rkisp1_params *params,
 			   const struct rkisp1_cif_isp_hst_config *arg, bool en);
 	void (*afm_config)(struct rkisp1_params *params,
 			   const struct rkisp1_cif_isp_afc_config *arg);
+	void (*ynr_config)(struct rkisp1_params *params,
+			   const struct isp21_ynr_config *arg);
+	void (*ynr_enable)(struct rkisp1_params *params,
+			   const struct isp21_ynr_config *arg, bool en);
+	void (*cnr_config)(struct rkisp1_params *params,
+			   const struct isp21_cnr_config *arg);
+	void (*cnr_enable)(struct rkisp1_params *params,
+			   const struct isp21_cnr_config *arg, bool en);
+	void (*sharp_config)(struct rkisp1_params *params,
+			     const struct isp21_sharp_config *arg);
+	void (*sharp_enable)(struct rkisp1_params *params, bool en);
+	void (*baynr_config)(struct rkisp1_params *params,
+			     const struct isp21_baynr_config *arg);
+	void (*baynr_enable)(struct rkisp1_params *params, bool en);
+	void (*bay3d_config)(struct rkisp1_params *params,
+			     const struct isp21_bay3d_config *arg);
+	void (*bay3d_enable)(struct rkisp1_params *params,
+			     const struct isp21_bay3d_config *arg, bool en);
 };
 
 /*
@@ -384,6 +438,8 @@ struct rkisp1_params {
 	spinlock_t config_lock; /* locks the buffers list 'params' */
 	struct list_head params;
 	struct v4l2_format vdev_fmt;
+
+	struct rkisp1_dummy_buffer buf_3dnr;
 
 	enum v4l2_quantization quantization;
 	enum v4l2_ycbcr_encoding ycbcr_encoding;
@@ -444,6 +500,7 @@ struct rkisp1_debug {
  * struct rkisp1_device - ISP platform device
  *
  * @base_addr:	   base register address
+ * @base2_addr:	   base register address for registers above MMU
  * @dev:	   a pointer to the struct device
  * @clk_size:	   number of clocks
  * @clks:	   array of clocks
@@ -468,6 +525,7 @@ struct rkisp1_debug {
  */
 struct rkisp1_device {
 	void __iomem *base_addr;
+	void __iomem *base2_addr;
 	struct device *dev;
 	unsigned int clk_size;
 	struct clk_bulk_data clks[RKISP1_MAX_BUS_CLK];
@@ -516,12 +574,21 @@ struct rkisp1_mbus_info {
 static inline void
 rkisp1_write(struct rkisp1_device *rkisp1, unsigned int addr, u32 val)
 {
-	writel(val, rkisp1->base_addr + addr);
+	if ((rkisp1->info->isp_ver != RKISP1_V21) || (addr < RKMMU_OFFSET))
+		writel(val, rkisp1->base_addr + addr);
+	else
+		writel(val, rkisp1->base2_addr - BASE2_OFFSET + addr);
+
+	if((addr >= 0x4800) && (addr < 0x4c00))
+	  printhist("addr: %x, val: 0x%08x\n", addr, val);
 }
 
 static inline u32 rkisp1_read(struct rkisp1_device *rkisp1, unsigned int addr)
 {
-	return readl(rkisp1->base_addr + addr);
+	if ((rkisp1->info->isp_ver != RKISP1_V21) || (addr < RKMMU_OFFSET))
+		return readl(rkisp1->base_addr + addr);
+	else
+		return readl(rkisp1->base2_addr - BASE2_OFFSET + addr);
 }
 
 /*
@@ -620,6 +687,7 @@ irqreturn_t rkisp1_isp_isr(int irq, void *ctx);
 irqreturn_t rkisp1_csi_isr(int irq, void *ctx);
 irqreturn_t rkisp1_capture_isr(int irq, void *ctx);
 void rkisp1_stats_isr(struct rkisp1_stats *stats, u32 isp_ris);
+void rkisp1_stats3a_isr(struct rkisp1_stats *stats, u32 isp_ris);
 void rkisp1_params_isr(struct rkisp1_device *rkisp1);
 
 /* register/unregisters functions of the entities */

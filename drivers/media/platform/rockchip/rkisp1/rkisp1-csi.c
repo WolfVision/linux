@@ -64,11 +64,21 @@ static int rkisp1_csi_config(struct rkisp1_csi *csi,
 {
 	struct rkisp1_device *rkisp1 = csi->rkisp1;
 	unsigned int lanes = sensor->lanes;
-	u32 mipi_ctrl;
+	//u32 mipi_ctrl;
 
 	if (lanes < 1 || lanes > 4)
 		return -EINVAL;
 
+	dev_info(rkisp1->dev, "using %d CSI lanes\n", lanes);
+
+	rkisp1_write(rkisp1, RKISP2_CIF_MIPI_CTRL1, lanes - 1);
+	rkisp1_write(rkisp1, RKISP2_CIF_MIPI_CTRL2, 0x3FFF);
+	rkisp1_write(rkisp1, RKISP2_CIF_MIPI_DATA_IDS1,
+		     RKISP1_CIF_MIPI_DATA_SEL_DT(format->mipi_dt) |
+			     RKISP1_CIF_MIPI_DATA_SEL_VC(0));
+	//rkisp1_write(rkisp1, RKISP2_CIF_MIPI_MASK_STAT, 0xFF000000);
+
+#if 0
 	mipi_ctrl = RKISP1_CIF_MIPI_CTRL_NUM_LANES(lanes - 1) |
 		    RKISP1_CIF_MIPI_CTRL_SHUTDOWNLANES(0xf) |
 		    RKISP1_CIF_MIPI_CTRL_ERR_SOT_SYNC_HS_SKIP |
@@ -106,7 +116,7 @@ static int rkisp1_csi_config(struct rkisp1_csi *csi,
 		rkisp1_read(rkisp1, RKISP1_CIF_MIPI_IMG_DATA_SEL),
 		rkisp1_read(rkisp1, RKISP1_CIF_MIPI_STATUS),
 		rkisp1_read(rkisp1, RKISP1_CIF_MIPI_IMSC));
-
+#endif
 	return 0;
 }
 
@@ -194,11 +204,16 @@ irqreturn_t rkisp1_csi_isr(int irq, void *ctx)
 {
 	struct device *dev = ctx;
 	struct rkisp1_device *rkisp1 = dev_get_drvdata(dev);
-	u32 val, status;
+	u32 /*val,*/ status;
 
 	if (!rkisp1->irqs_enabled)
 		return IRQ_NONE;
 
+	status = rkisp1_read(rkisp1, RKISP2_CIF_MIPI_ERR_STAT);
+	if (!status)
+		return IRQ_NONE;
+
+#if 0
 	status = rkisp1_read(rkisp1, RKISP1_CIF_MIPI_MIS);
 	if (!status)
 		return IRQ_NONE;
@@ -236,7 +251,7 @@ irqreturn_t rkisp1_csi_isr(int irq, void *ctx)
 	} else {
 		rkisp1->debug.mipi_error++;
 	}
-
+#endif
 	return IRQ_HANDLED;
 }
 

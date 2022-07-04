@@ -13,7 +13,7 @@
 #define RKISP1_RSZ_SP_DEV_NAME	RKISP1_DRIVER_NAME "_resizer_selfpath"
 #define RKISP1_RSZ_MP_DEV_NAME	RKISP1_DRIVER_NAME "_resizer_mainpath"
 
-#define RKISP1_DEF_FMT MEDIA_BUS_FMT_YUYV8_2X8
+#define RKISP1_DEF_FMT MEDIA_BUS_FMT_UYVY8_2X8
 #define RKISP1_DEF_PIXEL_ENC V4L2_PIXEL_ENC_YUV
 
 struct rkisp1_rsz_yuv_mbus_info {
@@ -24,7 +24,7 @@ struct rkisp1_rsz_yuv_mbus_info {
 
 static const struct rkisp1_rsz_yuv_mbus_info rkisp1_rsz_yuv_src_formats[] = {
 	{
-		.mbus_code	= MEDIA_BUS_FMT_YUYV8_2X8, /* YUV422 */
+		.mbus_code	= MEDIA_BUS_FMT_UYVY8_2X8, /* YUV422 */
 		.hdiv		= 2,
 		.vdiv		= 1,
 	},
@@ -347,7 +347,7 @@ static int rkisp1_rsz_enum_mbus_code(struct v4l2_subdev *sd,
 	if (rsz->id == RKISP1_SELFPATH) {
 		if (code->index > 0)
 			return -EINVAL;
-		code->code = MEDIA_BUS_FMT_YUYV8_2X8;
+		code->code = MEDIA_BUS_FMT_UYVY8_2X8;
 		return 0;
 	}
 
@@ -482,7 +482,7 @@ static void rkisp1_rsz_set_sink_fmt(struct rkisp1_resizer *rsz,
 	sink_crop = v4l2_subdev_state_get_crop(sd_state, RKISP1_RSZ_PAD_SINK);
 
 	if (rsz->id == RKISP1_SELFPATH)
-		sink_fmt->code = MEDIA_BUS_FMT_YUYV8_2X8;
+		sink_fmt->code = MEDIA_BUS_FMT_UYVY8_2X8;
 	else
 		sink_fmt->code = format->code;
 

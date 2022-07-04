@@ -12,7 +12,7 @@
 
 static const struct rkisp1_mbus_info rkisp1_formats[] = {
 	{
-		.mbus_code	= MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus_code	= MEDIA_BUS_FMT_UYVY8_2X8,
 		.pixel_enc	= V4L2_PIXEL_ENC_YUV,
 		.direction	= RKISP1_ISP_SD_SRC,
 	}, {

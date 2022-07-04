@@ -19,7 +19,7 @@
 #include "rkisp1-common.h"
 
 #define RKISP1_DEF_SINK_PAD_FMT MEDIA_BUS_FMT_SRGGB10_1X10
-#define RKISP1_DEF_SRC_PAD_FMT MEDIA_BUS_FMT_YUYV8_2X8
+#define RKISP1_DEF_SRC_PAD_FMT MEDIA_BUS_FMT_UYVY8_2X8
 
 #define RKISP1_ISP_DEV_NAME	RKISP1_DRIVER_NAME "_isp"
 
@@ -181,20 +181,23 @@ static void rkisp1_config_ism(struct rkisp1_isp *isp,
 	struct rkisp1_device *rkisp1 = isp->rkisp1;
 	u32 val;
 
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_RECENTER, 0);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_MAX_DX, 0);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_MAX_DY, 0);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_DISPLACE, 0);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_H_OFFS, src_crop->left);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_V_OFFS, src_crop->top);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_H_SIZE, src_crop->width);
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_V_SIZE, src_crop->height);
+	if (rkisp1->info->isp_ver != RKISP1_V21) {
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_RECENTER, 0);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_MAX_DX, 0);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_MAX_DY, 0);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_DISPLACE, 0);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_H_OFFS, src_crop->left);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_V_OFFS, src_crop->top);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_H_SIZE, src_crop->width);
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_V_SIZE,
+			     src_crop->height);
 
-	/* IS(Image Stabilization) is always on, working as output crop */
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_CTRL, 1);
-	val = rkisp1_read(rkisp1, RKISP1_CIF_ISP_CTRL);
-	val |= RKISP1_CIF_ISP_CTRL_ISP_CFG_UPD;
-	rkisp1_write(rkisp1, RKISP1_CIF_ISP_CTRL, val);
+		/* IS(Image Stabilization) is always on, working as output crop */
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_IS_CTRL, 1);
+		val = rkisp1_read(rkisp1, RKISP1_CIF_ISP_CTRL);
+		val |= RKISP1_CIF_ISP_CTRL_ISP_CFG_UPD;
+		rkisp1_write(rkisp1, RKISP1_CIF_ISP_CTRL, val);
+	}
 }
 
 /*
@@ -230,8 +233,15 @@ static int rkisp1_config_isp(struct rkisp1_isp *isp,
 			else
 				isp_ctrl = RKISP1_CIF_ISP_CTRL_ISP_MODE_RAW_PICT;
 		} else {
-			rkisp1_write(rkisp1, RKISP1_CIF_ISP_DEMOSAIC,
-				     RKISP1_CIF_ISP_DEMOSAIC_TH(0xc));
+			if (rkisp1->info->isp_ver == RKISP1_V21) {
+				rkisp1_write(rkisp1, RKISP2_DEBAYER_CONTROL,
+					     RKISP1_CIF_DEBAYER_EN_C_FILTER_V21 |
+					     RKISP1_CIF_DEBAYER_EN_G_FILTER_V21 |
+					     RKISP1_CIF_DEBAYER_EN_V21);
+			} else {
+				rkisp1_write(rkisp1, RKISP1_CIF_ISP_DEMOSAIC,
+					     RKISP1_CIF_ISP_DEMOSAIC_TH(0xc));
+			}
 
 			if (mbus_type == V4L2_MBUS_BT656)
 				isp_ctrl = RKISP1_CIF_ISP_CTRL_ISP_MODE_BAYER_ITU656;
@@ -677,8 +687,18 @@ static void rkisp1_isp_set_src_fmt(struct rkisp1_isp *isp,
 
 	if (set_csc && src_info->pixel_enc == V4L2_PIXEL_ENC_YUV) {
 		if (sink_info->pixel_enc == V4L2_PIXEL_ENC_BAYER) {
-			if (format->colorspace != V4L2_COLORSPACE_DEFAULT)
+			if (format->colorspace != V4L2_COLORSPACE_DEFAULT) {
 				src_fmt->colorspace = format->colorspace;
+				src_fmt->xfer_func =
+					V4L2_MAP_XFER_FUNC_DEFAULT(format->colorspace);
+				src_fmt->ycbcr_enc =
+					V4L2_MAP_YCBCR_ENC_DEFAULT(format->colorspace);
+				src_fmt->quantization =
+					V4L2_MAP_QUANTIZATION_DEFAULT(
+						src_info->pixel_enc == V4L2_PIXEL_ENC_RGB,
+						format->colorspace,
+						src_fmt->ycbcr_enc);
+			}
 			if (format->xfer_func != V4L2_XFER_FUNC_DEFAULT)
 				src_fmt->xfer_func = format->xfer_func;
 			if (format->ycbcr_enc != V4L2_YCBCR_ENC_DEFAULT)
@@ -1135,14 +1155,22 @@ irqreturn_t rkisp1_isp_isr(int irq, void *ctx)
 	}
 
 	if (status & RKISP1_CIF_ISP_FRAME) {
-		u32 isp_ris;
+		u32 isp_ris, isp_ris3a;
 
 		rkisp1->debug.complete_frames++;
 
 		/* New frame from the sensor received */
 		isp_ris = rkisp1_read(rkisp1, RKISP1_CIF_ISP_RIS);
-		if (isp_ris & RKISP1_STATS_MEAS_MASK)
-			rkisp1_stats_isr(&rkisp1->stats, isp_ris);
+		isp_ris3a = rkisp1_read(rkisp1, RKISP1_CIF_ISP3A_RIS_V21);
+
+		if (rkisp1->info->isp_ver != RKISP1_V21)
+			if (isp_ris & RKISP1_STATS_MEAS_MASK)
+				rkisp1_stats_isr(&rkisp1->stats, isp_ris);
+
+		if (rkisp1->info->isp_ver == RKISP1_V21)
+			if (isp_ris3a & RKISP1_STATS3A_MEAS_MASK_V21)
+				rkisp1_stats3a_isr(&rkisp1->stats, isp_ris3a);
+
 		/*
 		 * Then update changed configs. Some of them involve
 		 * lot of register writes. Do those only one per frame.

@@ -96,54 +96,47 @@ struct rkisp1_capture_config {
 static const struct rkisp1_capture_fmt_cfg rkisp1_mp_fmts[] = {
 	/* yuv422 */
 	{
-		.fourcc = V4L2_PIX_FMT_YUYV,
-		.uv_swap = 0,
-		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUVINT,
-		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
-	}, {
 		.fourcc = V4L2_PIX_FMT_UYVY,
 		.uv_swap = 0,
-		.yc_swap = 1,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUVINT,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_YUV422P,
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUV_PLA_OR_RAW8,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV16,
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUV_SPLA,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV61,
 		.uv_swap = 1,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUV_SPLA,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV16M,
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUV_SPLA,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV61M,
 		.uv_swap = 1,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUV_SPLA,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_YVU422M,
 		.uv_swap = 1,
 		.write_format = RKISP1_MI_CTRL_MP_WRITE_YUV_PLA_OR_RAW8,
 		.output_format = RKISP1_CIF_MI_INIT_MP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	},
 	/* yuv400 */
 	{
@@ -270,54 +263,47 @@ static const struct rkisp1_capture_fmt_cfg rkisp1_mp_fmts[] = {
 static const struct rkisp1_capture_fmt_cfg rkisp1_sp_fmts[] = {
 	/* yuv422 */
 	{
-		.fourcc = V4L2_PIX_FMT_YUYV,
-		.uv_swap = 0,
-		.write_format = RKISP1_MI_CTRL_SP_WRITE_INT,
-		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
-	}, {
 		.fourcc = V4L2_PIX_FMT_UYVY,
 		.uv_swap = 0,
-		.yc_swap = 1,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_INT,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_YUV422P,
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_PLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV16,
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_SPLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV61,
 		.uv_swap = 1,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_SPLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV16M,
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_SPLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_NV61M,
 		.uv_swap = 1,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_SPLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_YVU422M,
 		.uv_swap = 1,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_PLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	},
 	/* yuv400 */
 	{
@@ -325,19 +311,19 @@ static const struct rkisp1_capture_fmt_cfg rkisp1_sp_fmts[] = {
 		.uv_swap = 0,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_PLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_YUV422,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	},
 	/* rgb */
 	{
 		.fourcc = V4L2_PIX_FMT_XBGR32,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_PLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_RGB888,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	}, {
 		.fourcc = V4L2_PIX_FMT_RGB565,
 		.write_format = RKISP1_MI_CTRL_SP_WRITE_PLA,
 		.output_format = RKISP1_MI_CTRL_SP_OUTPUT_RGB565,
-		.mbus = MEDIA_BUS_FMT_YUYV8_2X8,
+		.mbus = MEDIA_BUS_FMT_UYVY8_2X8,
 	},
 	/* yuv420 */
 	{
@@ -520,6 +506,7 @@ static void rkisp1_mp_config(struct rkisp1_capture *cap)
 	 * NV12/NV21 and NV16/NV61, so instead use byte swap to support UYVY.
 	 * YVYU and VYUY cannot be supported with this method.
 	 */
+#if 0
 	if (rkisp1_has_feature(rkisp1, MAIN_STRIDE)) {
 		reg = rkisp1_read(rkisp1, RKISP1_CIF_MI_OUTPUT_ALIGN_FORMAT);
 		if (cap->pix.cfg->yc_swap || cap->pix.cfg->byte_swap)
@@ -533,6 +520,7 @@ static void rkisp1_mp_config(struct rkisp1_capture *cap)
 		rkisp1_write(rkisp1, RKISP1_CIF_MI_INIT,
 			     cap->pix.cfg->output_format);
 	}
+#endif
 
 	rkisp1_mi_config_ctrl(cap);
 
@@ -1622,7 +1610,7 @@ rkisp1_capture_init(struct rkisp1_device *rkisp1, enum rkisp1_stream_id id)
 	cap->is_streaming = false;
 
 	memset(&pixm, 0, sizeof(pixm));
-	pixm.pixelformat = V4L2_PIX_FMT_YUYV;
+	pixm.pixelformat = V4L2_PIX_FMT_UYVY;
 	pixm.width = RKISP1_DEFAULT_WIDTH;
 	pixm.height = RKISP1_DEFAULT_HEIGHT;
 	rkisp1_set_fmt(cap, &pixm);
