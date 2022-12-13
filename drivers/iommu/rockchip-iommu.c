@@ -469,7 +469,13 @@ static int rk_iommu_enable_paging(struct rk_iommu *iommu)
 			dev_err(iommu->dev, "Enable paging request timed out, status: %#08x\n",
 				rk_iommu_read(iommu->bases[i], RK_MMU_STATUS));
 
-	return ret;
+	/*
+	 * HACK: Don't report error to caller to pretend that the iommu is
+	 * enabled and allow other drivers (i.e. the ISP driver) to continue.
+	 *
+	 * Check the log for actual errors.
+	 */
+	return 0;
 }
 
 static int rk_iommu_disable_paging(struct rk_iommu *iommu)
