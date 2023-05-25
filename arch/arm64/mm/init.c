@@ -31,6 +31,9 @@
 #include <linux/crash_dump.h>
 #include <linux/hugetlb.h>
 #include <linux/acpi_iort.h>
+#ifdef CONFIG_ROCKCHIP_RKNPU
+#include <linux/rk-dma-heap.h>
+#endif
 #include <linux/kmemleak.h>
 
 #include <asm/boot.h>
@@ -351,7 +354,9 @@ void __init bootmem_init(void)
 	 * Reserve the CMA area after arm64_dma_phys_limit was initialised.
 	 */
 	dma_contiguous_reserve(arm64_dma_phys_limit);
-
+#ifdef CONFIG_ROCKCHIP_RKNPU
+	rk_dma_heap_cma_setup();
+#endif
 	/*
 	 * request_standard_resources() depends on crashkernel's memory being
 	 * reserved, so do it here.

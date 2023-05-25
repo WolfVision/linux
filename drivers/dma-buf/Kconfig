@@ -90,5 +90,6 @@ menuconfig DMABUF_SYSFS_STATS
 	   in quite some performance problems.
 
 source "drivers/dma-buf/heaps/Kconfig"
+source "drivers/dma-buf/rk_heaps/Kconfig"
 
 endmenu
